@@ -6,13 +6,14 @@ import {
 import { Web3Modal } from "@web3modal/react";
 import React from "react";
 import { configureChains, createClient, WagmiConfig } from "wagmi";
-import { arbitrum, mainnet, polygon } from "wagmi/chains";
+import { polygonMumbai } from "wagmi/chains";
+import Header from "./components/Header";
 
-const chains = [arbitrum, mainnet, polygon];
+const chains = [polygonMumbai];
 
 // Wagmi client
 const { provider } = configureChains(chains, [
-  walletConnectProvider({ projectId: "<YOUR_PROJECT_ID>" }),
+  walletConnectProvider({ projectId: "91c6a62977db67a01d779b76bc33d38f" }),
 ]);
 const wagmiClient = createClient({
   autoConnect: true,
@@ -27,15 +28,11 @@ function App() {
   return (
     <React.Fragment>
       <WagmiConfig client={wagmiClient}>
-        <div className="h-screen">React Web3 Template</div>
-        <div className="h-screen">React Web3 Template</div>
-        <div className="h-screen">React Web3 Template</div>
-        <div className="h-screen">React Web3 Template</div>
-        <div className="h-screen">React Web3 Template</div>
+        <Header />
       </WagmiConfig>
 
       <Web3Modal
-        projectId="<YOUR_PROJECT_ID>"
+        projectId="91c6a62977db67a01d779b76bc33d38f"
         ethereumClient={ethereumClient}
       />
     </React.Fragment>
