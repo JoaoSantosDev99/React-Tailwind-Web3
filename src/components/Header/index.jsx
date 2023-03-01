@@ -1,34 +1,52 @@
-import { Web3Button } from "@web3modal/react";
-import { useAccount, useSigner } from "wagmi";
+import { useAccount, useNetwork, useSigner, useSwitchNetwork } from "wagmi";
 import abi from "../../contracts/abi.json";
 import { ethers } from "ethers";
 import { useState } from "react";
+import { useWeb3Modal } from "@web3modal/react";
 
 const Header = () => {
   const [number, setNumber] = useState(0);
-
-  const contractAddress = "0x5741fc5de32497F4e69aAfd0EAA268129e3A501d";
+  const { open } = useWeb3Modal();
+  const { chain } = useNetwork();
+  const { switchNetwork } = useSwitchNetwork();
 
   const { address, isConnected } = useAccount();
   const { data: signer } = useSigner();
 
-  const presaleContract = new ethers.Contract(contractAddress, abi, signer);
+  const contractAddress = "0x5741fc5de32497F4e69aAfd0EAA268129e3A501d";
+
+  const contract = new ethers.Contract(contractAddress, abi, signer);
+
+  const connectWallet = () => {
+    console.log(chain?.id);
+
+    try {
+      switchNetwork?.(5);
+
+      open();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const staticProvider = new ethers.providers.JsonRpcProvider(
+    "https://rpc.ankr.com/eth_goerli"
+  );
 
   // function calls
   const getNumber = async () => {
-    const call = await presaleContract.retrieve();
+    const call = await contract.retrieve();
     const formatedCall = ethers.utils.formatUnits(call, 0);
     setNumber(formatedCall);
   };
 
   const changeNumber = async () => {
-    // asks the user to connect if they're not already
     if (signer === undefined) {
       return alert("Not connected");
     }
 
     try {
-      const call = await presaleContract.store(`${Number(number) + 2}`);
+      const call = await contract.store(`${Number(number) + 2}`);
       await call.wait();
       alert("success!");
     } catch (error) {
@@ -44,7 +62,12 @@ const Header = () => {
             {address.slice(0, 4) + " ... " + address.slice(-4)}
           </button>
         ) : (
-          <Web3Button />
+          <button
+            onClick={connectWallet}
+            className="bg-black text-white p-2 rounded"
+          >
+            Connect Wallet
+          </button>
         )}
       </div>
 
