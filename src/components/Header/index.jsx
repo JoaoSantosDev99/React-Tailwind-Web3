@@ -55,30 +55,26 @@ const Header = () => {
   };
 
   return (
-    <header>
-      <div>
+    <header className="w-full flex justify-center">
+      <div className="max-w-screen-2xl shadow-2xl border-b border-[#3e4e60] w-full flex justify-between p-5">
+        <h1 className="flex items-center gap-4">
+          <div className="rounded-full bg-white h-12 w-12"></div>
+          <span className="text-2xl text-white"> Name</span>
+        </h1>
+
         {isConnected ? (
-          <button className="bg-black text-white p-2 rounded">
-            {address.slice(0, 4) + " ... " + address.slice(-4)}
+          <button className="bg-[#253341] text-[#e4e4e4] px-4 p-2 rounded">
+            {address.slice(0, 5) + " ... " + address.slice(-5)}
           </button>
         ) : (
           <button
             onClick={connectWallet}
-            className="bg-black text-white p-2 rounded"
+            className="bg-[#253341] text-[#e4e4e4] px-4 p-2 rounded"
           >
             Connect Wallet
           </button>
         )}
       </div>
-
-      <button onClick={getNumber} className="p-2 bg-orange-300">
-        get number
-      </button>
-      <button onClick={changeNumber} className="p-2 bg-orange-300 ml-2">
-        Number +2
-      </button>
-
-      <div>Number: {number === 0 ? "waiting" : number}</div>
     </header>
   );
 };
