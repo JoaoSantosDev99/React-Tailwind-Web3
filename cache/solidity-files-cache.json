@@ -7,12 +7,12 @@
     "tests": "test",
     "scripts": "script",
     "libraries": [
-      "node_modules"
+      "lib"
     ]
   },
   "files": {
     "src/contracts/ storage.sol": {
-      "lastModificationDate": 1684943599706,
+      "lastModificationDate": 1688056213695,
       "contentHash": "90ffc449ae4a4520e4f167fcc2cd038c",
       "sourceName": "src/contracts/ storage.sol",
       "solcConfig": {

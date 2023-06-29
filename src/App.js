@@ -1,13 +1,30 @@
 import React from "react";
 import Header from "./components/Header";
-import Main from "./Main";
+
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Main from "./Pages/Main";
+import Secondary from "./Pages/Secondary";
 
 function App() {
   return (
-    <React.Fragment>
+    <BrowserRouter>
       <Header />
-      <Main />
-    </React.Fragment>
+      <Routes>
+        <Route
+          path="/"
+          element={<Main />}
+        />
+
+        <Route
+          path="/main"
+          element={<Main />}
+        />
+        <Route
+          path="/secondary"
+          element={<Secondary />}
+        />
+      </Routes>
+    </BrowserRouter>
   );
 }
 

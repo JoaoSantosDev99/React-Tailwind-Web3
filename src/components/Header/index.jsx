@@ -3,9 +3,10 @@ import abi from "../../contracts/abi.json";
 import { ethers } from "ethers";
 import { useState } from "react";
 import { useWeb3Modal } from "@web3modal/react";
+import { longAdd, shortAdd } from "../../utils";
+import { NavLink } from "react-router-dom";
 
 const Header = () => {
-  const [number, setNumber] = useState(0);
   const { open } = useWeb3Modal();
   const { chain } = useNetwork();
   const { switchNetwork } = useSwitchNetwork();
@@ -33,27 +34,6 @@ const Header = () => {
     "https://rpc.ankr.com/eth_goerli"
   );
 
-  // function calls
-  const getNumber = async () => {
-    const call = await contract.retrieve();
-    const formatedCall = ethers.utils.formatUnits(call, 0);
-    setNumber(formatedCall);
-  };
-
-  const changeNumber = async () => {
-    if (signer === undefined) {
-      return alert("Not connected");
-    }
-
-    try {
-      const call = await contract.store(`${Number(number) + 2}`);
-      await call.wait();
-      alert("success!");
-    } catch (error) {
-      alert(error);
-    }
-  };
-
   return (
     <header className="w-full flex justify-center">
       <div className="max-w-screen-2xl shadow-2xl border-b border-[#3e4e60] w-full flex justify-between p-5">
@@ -62,18 +42,43 @@ const Header = () => {
           <span className="text-2xl text-white"> Name</span>
         </h1>
 
-        {isConnected ? (
-          <button className="bg-[#253341] text-[#e4e4e4] px-4 p-2 rounded">
-            {address.slice(0, 5) + " ... " + address.slice(-5)}
-          </button>
-        ) : (
-          <button
-            onClick={connectWallet}
-            className="bg-[#253341] text-[#e4e4e4] px-4 p-2 rounded"
-          >
-            Connect Wallet
-          </button>
-        )}
+        <div className="flex gap-10">
+          <ul className="flex items-center gap-5">
+            <NavLink
+              to="/main"
+              className={({ isActive }) =>
+                isActive
+                  ? "font-medium bg-[#253341] text-white bg- border w-32 h-12 rounded-md flex justify-center items-center"
+                  : "font-medium text-white border w-32 h-12 rounded-md flex justify-center items-center"
+              }
+            >
+              Main
+            </NavLink>
+            <NavLink
+              to="/secondary"
+              className={({ isActive }) =>
+                isActive
+                  ? "font-medium bg-[#253341] text-white bg- border w-32 h-12 rounded-md flex justify-center items-center"
+                  : "font-medium text-white border w-32 h-12 rounded-md flex justify-center items-center"
+              }
+            >
+              Secondary
+            </NavLink>
+          </ul>
+
+          {isConnected ? (
+            <button className="bg-[#253341] text-[#e4e4e4] px-4 p-2 rounded">
+              {shortAdd(address)}
+            </button>
+          ) : (
+            <button
+              onClick={connectWallet}
+              className="bg-[#253341] text-[#e4e4e4] px-4 p-2 rounded"
+            >
+              Connect Wallet
+            </button>
+          )}
+        </div>
       </div>
     </header>
   );
