@@ -1,10 +1,6 @@
 import { useAccount, useNetwork, useSigner, useSwitchNetwork } from "wagmi";
-import abi from "../../contracts/abi.json";
-import { ethers } from "ethers";
-import { useState } from "react";
 import { useWeb3Modal } from "@web3modal/react";
-import { longAdd, shortAdd } from "../../utils";
-import { NavLink } from "react-router-dom";
+import { shortAdd } from "../../utils";
 
 const Header = () => {
   const { open } = useWeb3Modal();
@@ -12,60 +8,28 @@ const Header = () => {
   const { switchNetwork } = useSwitchNetwork();
 
   const { address, isConnected } = useAccount();
-  const { data: signer } = useSigner();
-
-  const contractAddress = "0x5741fc5de32497F4e69aAfd0EAA268129e3A501d";
-
-  const contract = new ethers.Contract(contractAddress, abi, signer);
 
   const connectWallet = () => {
-    console.log(chain?.id);
+    if (chain?.id !== 1) {
+      switchNetwork?.(1);
+    }
 
     try {
-      switchNetwork?.(5);
-
+      switchNetwork?.(1);
       open();
     } catch (error) {
       console.log(error);
     }
   };
 
-  const staticProvider = new ethers.providers.JsonRpcProvider(
-    "https://rpc.ankr.com/eth_goerli"
-  );
-
   return (
     <header className="w-full flex justify-center">
       <div className="max-w-screen-2xl shadow-2xl border-b border-[#3e4e60] w-full flex justify-between p-5">
         <h1 className="flex items-center gap-4">
-          <div className="rounded-full bg-white h-12 w-12"></div>
-          <span className="text-2xl text-white"> Name</span>
+          <span className="text-2xl text-white"> Barkbone Lending</span>
         </h1>
 
         <div className="flex gap-10">
-          <ul className="flex items-center gap-5">
-            <NavLink
-              to="/main"
-              className={({ isActive }) =>
-                isActive
-                  ? "font-medium bg-[#253341] text-white bg- border w-32 h-12 rounded-md flex justify-center items-center"
-                  : "font-medium text-white border w-32 h-12 rounded-md flex justify-center items-center"
-              }
-            >
-              Main
-            </NavLink>
-            <NavLink
-              to="/secondary"
-              className={({ isActive }) =>
-                isActive
-                  ? "font-medium bg-[#253341] text-white bg- border w-32 h-12 rounded-md flex justify-center items-center"
-                  : "font-medium text-white border w-32 h-12 rounded-md flex justify-center items-center"
-              }
-            >
-              Secondary
-            </NavLink>
-          </ul>
-
           {isConnected ? (
             <button className="bg-[#253341] text-[#e4e4e4] px-4 p-2 rounded">
               {shortAdd(address)}
