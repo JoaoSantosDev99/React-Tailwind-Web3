@@ -1,319 +1,179 @@
-import { useContext, useEffect, useState } from "react";
-import { AppContext } from "../context/appContext";
-import { ethers } from "ethers";
-import abi from "../contracts/barkbone.json";
-import depositAbi from "../contracts/deposit.json";
-
-import { useAccount, useNetwork, useSigner, useSwitchNetwork } from "wagmi";
+import CopyToClipboard from "react-copy-to-clipboard";
+import back from "../arrow.png";
+import lock from "../padlock.png";
+import copy from "../copy.png";
+import checked from "../checked.png";
+import refresh from "../refresh.png";
+import { useState } from "react";
 
 const Main = () => {
-  const {
-    ethBoneAdd,
-    ethBarkAdd,
-    ethProvider,
-    ethLendContractAdd,
-    shibProvider,
-    shibBone,
-    shibBark,
-    shiLendContractAdd,
-  } = useContext(AppContext);
+  const [copied, setCopied] = useState(false);
 
-  const { chain } = useNetwork();
-  const { switchNetwork } = useSwitchNetwork();
-
-  const { address, isConnected } = useAccount();
-  const { data: signer } = useSigner();
-
-  const [onEth, setonEth] = useState(true);
-
-  const [depositInputAmount, setdepositInputAmount] = useState(0);
-  const [withdrawInputAmount, setwithdrawInputAmount] = useState(0);
-
-  const [boneBalance, setBoneBalance] = useState(0);
-  const [barkBoneBalance, setbarkBoneBalance] = useState(0);
-  const [boneDeposited, setBoneDeposited] = useState(0);
-
-  const [shibboneBalance, setshibBoneBalance] = useState(0);
-  const [shibbarkBoneBalance, setshibbarkBoneBalance] = useState(0);
-  const [shibboneDeposited, setshibBoneDeposited] = useState(0);
-
-  const ethBoneContract = new ethers.Contract(ethBoneAdd, abi, ethProvider);
-  const ethBarkBoneContract = new ethers.Contract(ethBarkAdd, abi, ethProvider);
-
-  const shibBoneContract = new ethers.Contract(shibBone, abi, shibProvider);
-  const shibBarkBoneContract = new ethers.Contract(shibBark, abi, shibProvider);
-
-  const ethLendContract = new ethers.Contract(
-    ethLendContractAdd,
-    depositAbi,
-    ethProvider
-  );
-
-  const shibLendContract = new ethers.Contract(
-    shiLendContractAdd,
-    depositAbi,
-    shibProvider
-  );
-
-  const getData = async () => {
-    // Eth
-    const boneBal = await ethBoneContract.balanceOf(address);
-    const barkBal = await ethBarkBoneContract.balanceOf(address);
-    const coll = await ethLendContract.collateral(address);
-
-    setBoneBalance(Number(ethers.utils.formatUnits(boneBal, 18)).toFixed(2));
-    setbarkBoneBalance(
-      Number(ethers.utils.formatUnits(barkBal, 18)).toFixed(2)
-    );
-    setBoneDeposited(ethers.utils.formatEther(coll));
-
-    // Shib
-    const shibBoneBal = await shibBoneContract.balanceOf(address);
-    const shibBarkBal = await shibBarkBoneContract.balanceOf(address);
-    const shibCollateral = await shibLendContract.collateral(address);
-
-    setshibBoneBalance(
-      Number(ethers.utils.formatUnits(shibBoneBal, 18)).toFixed(2)
-    );
-    setshibbarkBoneBalance(
-      Number(ethers.utils.formatUnits(shibBarkBal, 18)).toFixed(2)
-    );
-    setshibBoneDeposited(ethers.utils.formatEther(shibCollateral));
+  const changeCopied = () => {
+    setCopied(true);
+    setTimeout(() => {
+      setCopied(false);
+    }, 2000);
   };
-
-  useEffect(() => {
-    if (!isConnected) return;
-    getData();
-  }, []);
-
-  const changeInputAmount = (e) => {
-    setdepositInputAmount(e.target.value);
-  };
-
-  const changeDepositInputAmount = (e) => {
-    setwithdrawInputAmount(e.target.value);
-  };
-
-  const depositBoneEth = async () => {
-    console.log("eth");
-    if (!isConnected) return;
-
-    if (chain?.id !== 1) {
-      switchNetwork?.(1);
-    }
-
-    const ethBoneContract = new ethers.Contract(ethBoneAdd, abi, signer);
-    const ethDepositContract = new ethers.Contract(
-      ethLendContractAdd,
-      depositAbi,
-      signer
-    );
-
-    try {
-      const approve = await ethBoneContract.approve(
-        ethLendContractAdd,
-        ethers.utils.parseEther(depositInputAmount)
-      );
-
-      await approve.wait();
-
-      const deposit = await ethDepositContract.deposit(
-        ethers.utils.parseEther(depositInputAmount)
-      );
-
-      await deposit.wait();
-      getData();
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  const depositBoneShib = async () => {
-    console.log("shib");
-
-    if (!isConnected) return;
-
-    if (chain?.id !== 109) {
-      switchNetwork?.(109);
-    }
-
-    // ethBoneAdd,
-    // ethBarkAdd,
-    // ethProvider,
-    // ethLendContractAdd,
-    // shibProvider,
-    // shibBone,
-    // shibBark,
-    // shiLendContractAdd,
-
-    const shibaBoneContract = new ethers.Contract(shibBone, abi, signer);
-    const shiLendContract = new ethers.Contract(
-      ethLendContractAdd,
-      depositAbi,
-      signer
-    );
-
-    try {
-      const approve = await shibaBoneContract.approve(
-        shiLendContractAdd,
-        ethers.utils.parseEther(depositInputAmount)
-      );
-
-      await approve.wait();
-
-      const deposit = await shiLendContract.deposit(
-        ethers.utils.parseEther(depositInputAmount)
-      );
-
-      await deposit.wait();
-      getData();
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  const withdrawBoneEth = async () => {
-    console.log("Eth");
-
-    if (!isConnected) return;
-
-    if (chain?.id !== 1) {
-      switchNetwork?.(1);
-    }
-
-    const ethBarkBoneContract = new ethers.Contract(ethBarkAdd, abi, signer);
-
-    const ethDepositContract = new ethers.Contract(
-      ethLendContractAdd,
-      depositAbi,
-      signer
-    );
-
-    try {
-      const approve = await ethBarkBoneContract.approve(
-        ethLendContractAdd,
-        ethers.utils.parseEther(withdrawInputAmount)
-      );
-
-      await approve.wait();
-
-      const withdraw = await ethDepositContract.withdraw(
-        ethers.utils.parseEther(withdrawInputAmount)
-      );
-
-      await withdraw.wait();
-      getData();
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  const withdrawBoneShib = async () => {
-    console.log("shib");
-
-    if (!isConnected) return;
-
-    if (chain?.id !== 109) {
-      switchNetwork?.(109);
-    }
-
-    // ethBoneAdd,
-    // ethBarkAdd,
-    // ethProvider,
-    // ethLendContractAdd,
-    // shibProvider,
-    // shibBone,
-    // shibBark,
-    // shiLendContractAdd,
-
-    const ethBarkBoneContract = new ethers.Contract(ethBarkAdd, abi, signer);
-
-    const ethDepositContract = new ethers.Contract(
-      ethLendContractAdd,
-      depositAbi,
-      signer
-    );
-
-    try {
-      const approve = await ethBarkBoneContract.approve(
-        ethLendContractAdd,
-        ethers.utils.parseEther(withdrawInputAmount)
-      );
-
-      await approve.wait();
-
-      const withdraw = await ethDepositContract.withdraw(
-        ethers.utils.parseEther(withdrawInputAmount)
-      );
-
-      await withdraw.wait();
-      getData();
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
   return (
-    <section className="w-full flex justify-center">
-      <div className="h-screen w-full flex-col text-[50px] text-white items-center max-w-screen-xl flex justify-center">
-        <h2>Get BarkBone Here</h2>
+    <section className="w-full min-h-screen text-white flex justify-center items-center">
+      <div className="bg-[#1E2023] rounded-[20px] w-[576px] p-[24px]">
+        {/* Back and Lock */}
+        <div className="w-full flex justify-between">
+          <button className="flex justify-center items-center rounded-full p-2 hover:bg-[#303030] transition-all duration-300">
+            <img
+              src={back}
+              alt=""
+              className="w-6"
+            />
+          </button>
 
-        <div className="text-lg flex gap-5 items-center">
-          {onEth ? "Ethereum" : "Shibarium"}
-          <button
-            onClick={() => {
-              setonEth((prev) => !prev);
-            }}
-            className=" border-2 p-1 px-3"
-          >
-            swicth network
+          <button className="flex items-center gap-3 py-2 px-6 bg-[#55A0FD] rounded-[30px]">
+            {" "}
+            <img
+              src={lock}
+              alt=""
+              className="w-5"
+            />{" "}
+            Lock Liquidity
           </button>
         </div>
 
-        <div className="flex mt-10 gap-10 text-lg">
-          <div className="flex flex-col items-center">
-            <p>
-              {onEth ? "Bone" : "Wraped Bone"} Balance:{" "}
-              {onEth ? boneBalance : shibboneBalance}
-            </p>
-            <button
-              onClick={onEth ? depositBoneEth : depositBoneShib}
-              className="bg-[#253341] text text-[#e4e4e4] px-4 p-2 rounded"
-            >
-              Deposit Bone
-            </button>
-            <input
-              onChange={changeInputAmount}
-              value={depositInputAmount}
-              type="number"
-              min={0}
-              className="px-3 mt-4 w-full max-w-[200px] outline-none flex items-center text-xl justify-center gap-2 bg-[#192530] text-gray-200 h-[60px] rounded-lg"
-            />
+        {/* Stats */}
+        <div className="flex w-full justify-center mt-5 gap-3">
+          <span>Uniswap V2 pair:</span>
+          <CopyToClipboard
+            text={"addressGoesHere"}
+            onCopy={changeCopied}
+            className="cursor-pointer flex items-center gap-2"
+          >
+            <span className="flex gap-2 items-center">
+              0x491a...DDB42
+              <img
+                src={copied ? checked : copy}
+                alt=""
+                className="w-5"
+              />
+            </span>
+          </CopyToClipboard>{" "}
+        </div>
+
+        {/* text */}
+        <div className="flex flex-col mt-5 text-[20px]">
+          <span>1 DVD = 0.0000000000000031 WETH </span>
+          <span> 1 WETH = 325.17 T DVD</span>
+        </div>
+
+        {/* Graph */}
+        <div className="flex flex-col mt-10">
+          <span className="text-center text-[#B9B3AE]">Locked Liquidity</span>
+          <span className="text-center text-[30px] font-bold">98.9%</span>
+
+          <div className="flex items-center justify-between mt-5">
+            <div className="rounded-full border-[4px] w-20 h-20 p-2"></div>
+
+            <span className="w-[140px] h-1 border-2 border-white"></span>
+
+            <div className="rounded-full border-[4px] w-20 h-20 p-2"></div>
+
+            <span className="w-[140px] h-1 border-2 border-white"></span>
+
+            <div className="rounded-full border-[4px] w-20 h-20 p-2"></div>
           </div>
-          <div className="flex flex-col items-center">
-            <p>
-              BarkBone Balance: {onEth ? barkBoneBalance : shibbarkBoneBalance}
-            </p>
-            <button
-              onClick={onEth ? withdrawBoneEth : withdrawBoneShib}
-              className="bg-[#253341] text text-[#e4e4e4] px-4 p-2 rounded"
-            >
-              Withdraw Bone
-            </button>
-            <input
-              onChange={changeDepositInputAmount}
-              value={withdrawInputAmount}
-              type="number"
-              min={0}
-              className="px-3 mt-4 w-full max-w-[200px] outline-none flex items-center text-xl justify-center gap-2 bg-[#192530] text-gray-200 h-[60px] rounded-lg"
-            />
+
+          <div className="flex justify-between w-full mt-3">
+            <div className="flex flex-col items-start">
+              <span className="text-[28px]">Name Here</span>
+              <span>352.69 T</span>
+              <span>356.26 T (84.6%)</span>
+              <div className="flex gap-2 mt-2">
+                <span className="rounded-full w-10 h-10 bg-white"></span>
+                <span className="rounded-full w-10 h-10 bg-white"></span>
+              </div>
+            </div>
+
+            <div className="flex flex-col items-end">
+              <span className="text-[28px]">Name Here</span>
+              <span>352.69 T</span>
+              <span>356.26 T (84.6%)</span>
+              <div className="flex gap-2 mt-2">
+                <span className="rounded-full w-10 h-10 bg-white"></span>
+                <span className="rounded-full w-10 h-10 bg-white"></span>
+              </div>
+            </div>
           </div>
         </div>
 
-        <p className="text-xl mt-10">
-          Bone Available to Withdraw:{" "}
-          {onEth ? boneDeposited : shibboneDeposited}
-        </p>
+        {/* buttons */}
+        <div className="flex items-center justify-center py-3 border-t border-b mt-8 border-white">
+          <img
+            src={refresh}
+            alt=""
+            className="w-7 h-7 mr-3"
+          />
+          <button className="flex items-center gap-3 py-2 px-6 hover:bg-[#303030] transition-all duration-300 rounded-[30px]">
+            Etherscan
+          </button>
+          <button className="flex items-center gap-3 py-2 px-6 hover:bg-[#303030] transition-all duration-300 rounded-[30px]">
+            Uniswap V2
+          </button>
+          <button className="flex items-center gap-3 py-2 px-6 hover:bg-[#303030] transition-all duration-300 rounded-[30px]">
+            Dextools
+          </button>
+        </div>
+
+        {/* Reference */}
+        <div className="flex flex-col text-[12px] mt-2">
+          <div className="flex justify-between w-full">
+            <span>Total LP tokens</span>
+            <span>19,458,185.9381</span>
+          </div>
+          <div className="flex justify-between w-full">
+            <span>Total locked LP</span>
+            <span>19,263,604.0787</span>
+          </div>
+
+          <span className="text-[#c63939] text-[16px]">
+            Uniswap V2 price API is down, dollar value not determinable
+          </span>
+        </div>
+
+        {/* Text */}
+        <div className="mt-5">
+          <h2 className="text-[20px] font-bold">Liquidity Locks</h2>
+          <p>
+            Please be aware only the univ2 tokens are locked. Not the actual
+            dollar value. This changes as people trade. More liquidity tokens
+            are also minted as people add liquidity to the pool.
+          </p>
+        </div>
+
+        {/* Footer */}
+        <div className="mt-10">
+          <div className="flex justify-between">
+            <span>Value</span>
+            <span>Unlock date</span>
+          </div>
+
+          <div className="flex justify-between">
+            <div className="flex flex-col">
+              <span>$0</span>
+              <span>19,263,604.0787 univ2</span>
+            </div>
+
+            <div className="flex flex-col items-end">
+              <span className="flex gap-2">
+                in a month{" "}
+                <img
+                  src={lock}
+                  alt=""
+                  className="w-5 h-5"
+                />
+              </span>
+              <span>22/11/2023 17:00</span>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );

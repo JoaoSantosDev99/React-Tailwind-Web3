@@ -6,7 +6,6 @@ import Main from "./Pages/Main";
 function App() {
   return (
     <>
-      <Header />
       <Main />
     </>
   );
